@@ -1,0 +1,111 @@
+/*
+ * WIRING DIAGRAM - Flood Mitigation System
+ * ========================================
+ * 
+ * ESP32 DevKit V1 Layout:
+ * 
+ *                    ESP32 DevKit V1
+ *                 ┌─────────────────────┐
+ *                 │  EN          GPIO23 │
+ *                 │  VP          GPIO22 │
+ *                 │  VN          GPIO1  │
+ *                 │  GPIO35      GPIO3  │
+ *                 │  GPIO32      GPIO21 │
+ *                 │  GPIO33      GPIO19 │
+ *                 │  GPIO25      GPIO18 │
+ *                 │  GPIO26      GPIO5  │◄── YF-S201 Signal (Yellow)
+ *                 │  GPIO27      GPIO17 │
+ *                 │  GPIO14      GPIO16 │
+ *                 │  GPIO12      GPIO4  │◄── HC-SR04 Echo
+ *                 │  GPIO13      GPIO2  │◄── HC-SR04 Trig
+ *                 │  GND         GPIO15 │
+ *                 │  VIN         GND    │◄── Sensors GND (Black)
+ *                 └─────────────────────┘
+ *                           │
+ *                           ▼
+ *                         5V Power
+ *                           │
+ *                           ▼
+ *                    Sensors VCC (Red)
+ * 
+ * Component Connections:
+ * 
+ * 1. HC-SR04 Ultrasonic Sensor:
+ *    ┌─────────────┐
+ *    │   HC-SR04   │
+ *    │             │
+ *    │ VCC  GND    │
+ *    │ Trig Echo   │
+ *    └─────────────┘
+ *      │    │ │  │
+ *      │    │ │  └── ESP32 GPIO4 (Echo)
+ *      │    │ └───── ESP32 GPIO2 (Trig)
+ *      │    └─────── ESP32 GND
+ *      └──────────── ESP32 5V/VIN
+ * 
+ * 2. YF-S201 Water Flow Sensor:
+ *    ┌─────────────┐
+ *    │   YF-S201   │
+ *    │             │
+ *    │ Red  Black  │
+ *    │     Yellow  │
+ *    └─────────────┘
+ *      │     │  │
+ *      │     │  └── ESP32 GPIO5 (Signal)
+ *      │     └───── ESP32 GND
+ *      └─────────── ESP32 5V/VIN
+ * 
+ * Power Supply Requirements:
+ * - ESP32: 3.3V (via USB or external 5V)
+ * - HC-SR04: 5V, ~15mA
+ * - YF-S201: 5V, ~10mA
+ * - Total: ~25mA + ESP32 consumption
+ * 
+ * Physical Installation:
+ * 
+ * 1. HC-SR04 Mounting:
+ *    - Mount 50-100cm above normal water level
+ *    - Angle slightly downward (5-10 degrees)
+ *    - Protect from direct rain
+ *    
+ *    Side View:
+ *    ┌─────────┐ ← Protective Cover
+ *    │ HC-SR04 │
+ *    └─────────┘
+ *         │ Sound Waves
+ *         ▼
+ *    ═══════════ ← Water Surface
+ *    
+ * 2. YF-S201 Installation:
+ *    - Install in-line with water flow
+ *    - Ensure full pipe flow
+ *    - Arrow indicates flow direction
+ *    
+ *    Top View:
+ *    ┌─────┐  ┌─────────┐  ┌─────┐
+ *    │Pipe │──│ YF-S201 │──│Pipe │
+ *    └─────┘  └─────────┘  └─────┘
+ *               ▲
+ *           Flow Direction
+ * 
+ * Breadboard Layout (for prototyping):
+ * 
+ *     a  b  c  d  e   f  g  h  i  j
+ *  1  ○  ○  ○  ○  ○   ○  ○  ○  ○  ○
+ *  2  ○  ○  ○  ○  ○   ○  ○  ○  ○  ○
+ *  3  ○  ○  ○  ○  ○   ○  ○  ○  ○  ○
+ *  4  ○  ○  ○  ○  ○   ○  ○  ○  ○  ○
+ *  5  ○  ○  ○  ○  ○   ○  ○  ○  ○  ○
+ *     ▲           ▲   ▲           ▲
+ *     │           │   │           │
+ *  HC-SR04     YF-S201 │      ESP32
+ *  Connections  Signal  │      Power
+ *                      Power Rails
+ * 
+ * PCB Layout Considerations:
+ * - Keep sensor connections short
+ * - Use ground plane for noise reduction
+ * - Add pull-up resistor for YF-S201 if needed
+ * - Include power filtering capacitors
+ * - Waterproof connectors for sensors
+ */

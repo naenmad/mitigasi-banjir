@@ -1,0 +1,12 @@
+{
+    "name": "mqtt-simulator",
+    "version": "1.0.0",
+    "description": "MQTT simulator for flood mitigation system",
+    "main": "mqtt-simulator.js",
+    "scripts": {
+        "start": "node mqtt-simulator.js"
+    },
+    "dependencies": {
+        "mqtt": "^4.3.7"
+    }
+}
