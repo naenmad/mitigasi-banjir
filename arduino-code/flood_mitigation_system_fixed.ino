@@ -41,6 +41,10 @@ const char* ntpServer = "pool.ntp.org";
 const long gmtOffset_sec = 25200; // GMT+7 untuk Indonesia (7*3600)
 const int daylightOffset_sec = 0;
 
+// WhatsApp Alert tracking
+unsigned long lastWhatsAppAlert = 0;
+String lastAlertLevel = "LOW";
+
 void setup() {
   Serial.begin(SERIAL_BAUD_RATE);
   
@@ -200,6 +204,133 @@ unsigned long getCurrentTime() {
     return millis() / 1000;
   }
   return mktime(&timeinfo);
+}
+
+// Function to send WhatsApp alert via Twilio
+bool sendWhatsAppAlert(String alertLevel, float waterLevel, float flowRate, String recommendation) {
+  #if !ENABLE_WHATSAPP_ALERTS
+  return false;
+  #endif
+  
+  // Check cooldown period
+  unsigned long currentTime = millis();
+  if (currentTime - lastWhatsAppAlert < (ALERT_COOLDOWN_MINUTES * 60000)) {
+    Serial.println("WhatsApp alert cooldown active, skipping...");
+    return false;
+  }
+  
+  // Check alert level threshold
+  #if CRITICAL_ALERT_ONLY
+  if (alertLevel != "CRITICAL") {
+    return false;
+  }
+  #else
+  if (alertLevel != "HIGH" && alertLevel != "CRITICAL") {
+    return false;
+  }
+  #endif
+  
+  // Don't send same alert level repeatedly
+  if (alertLevel == lastAlertLevel && (currentTime - lastWhatsAppAlert < (30 * 60000))) {
+    return false;
+  }
+  
+  if (WiFi.status() != WL_CONNECTED) {
+    Serial.println("WiFi not connected, cannot send WhatsApp alert");
+    return false;
+  }
+  
+  HTTPClient http;
+  
+  // Twilio API URL
+  String url = "https://api.twilio.com/2010-04-01/Accounts/" + TWILIO_ACCOUNT_SID + "/Messages.json";
+  
+  http.begin(url);
+  http.setAuthorization(TWILIO_ACCOUNT_SID.c_str(), TWILIO_AUTH_TOKEN.c_str());
+  http.addHeader("Content-Type", "application/x-www-form-urlencoded");
+  
+  // Get current time for message
+  struct tm timeinfo;
+  String timeStr = "Unknown";
+  if (getLocalTime(&timeinfo)) {
+    char timeBuffer[64];
+    strftime(timeBuffer, sizeof(timeBuffer), "%Y-%m-%d %H:%M:%S", &timeinfo);
+    timeStr = String(timeBuffer);
+  }
+  
+  // Compose WhatsApp message
+  String message = "🚨 *FLOOD ALERT* 🚨\n\n";
+  message += "⚠️ *Risk Level: " + alertLevel + "*\n";
+  message += "📊 *Data Sensor:*\n";
+  message += "💧 Water Level: " + String(waterLevel, 1) + " cm\n";
+  message += "🌊 Flow Rate: " + String(flowRate, 1) + " L/min\n";
+  message += "🕒 Time: " + timeStr + "\n\n";
+  message += "📝 *Recommendation:*\n" + recommendation + "\n\n";
+  message += "🏠 *Flood Mitigation System*\n";
+  message += "Location: Your monitoring location";
+  
+  // Create POST data
+  String postData = "From=" + TWILIO_PHONE_NUMBER + 
+                   "&To=" + RECIPIENT_PHONE_NUMBER + 
+                   "&Body=" + urlEncode(message);
+  
+  Serial.println("Sending WhatsApp alert...");
+  Serial.println("Message: " + message);
+  
+  int httpResponseCode = http.POST(postData);
+  
+  if (httpResponseCode > 0) {
+    String response = http.getString();
+    Serial.print("WhatsApp alert HTTP Response: ");
+    Serial.println(httpResponseCode);
+    
+    if (httpResponseCode == 201) {
+      Serial.println("✅ WhatsApp alert sent successfully!");
+      lastWhatsAppAlert = currentTime;
+      lastAlertLevel = alertLevel;
+      http.end();
+      return true;
+    } else {
+      Serial.println("❌ WhatsApp alert failed:");
+      Serial.println(response);
+    }
+  } else {
+    Serial.print("❌ WhatsApp alert HTTP error: ");
+    Serial.println(httpResponseCode);
+  }
+  
+  http.end();
+  return false;
+}
+
+// URL encode function for WhatsApp message
+String urlEncode(String str) {
+  String encodedString = "";
+  char c;
+  char code0;
+  char code1;
+  for (int i = 0; i < str.length(); i++) {
+    c = str.charAt(i);
+    if (c == ' ') {
+      encodedString += '+';
+    } else if (isalnum(c)) {
+      encodedString += c;
+    } else {
+      code1 = (c & 0xf) + '0';
+      if ((c & 0xf) > 9) {
+        code1 = (c & 0xf) - 10 + 'A';
+      }
+      c = (c >> 4) & 0xf;
+      code0 = c + '0';
+      if (c > 9) {
+        code0 = c - 10 + 'A';
+      }
+      encodedString += '%';
+      encodedString += code0;
+      encodedString += code1;
+    }
+  }
+  return encodedString;
 }
 
 float readWaterLevel() {
@@ -448,8 +579,7 @@ void generateFloodPrediction() {
   } else if (rainfall > 5) {
     riskScore += 7.5;
   }
-  
-  // Determine risk level and recommendations based on score
+    // Determine risk level and recommendations based on score
   probability = fmin(riskScore / 100.0, 1.0); // Fixed: menggunakan fmin()
   
   if (riskScore >= 75) {
@@ -463,6 +593,11 @@ void generateFloodPrediction() {
   } else if (riskScore >= 25) {
     riskLevel = "MEDIUM";
     recommendation = "Monitor conditions closely. Consider moving to higher ground.";
+  }
+  
+  // Send WhatsApp alert for HIGH or CRITICAL risk
+  if (riskLevel == "HIGH" || riskLevel == "CRITICAL") {
+    sendWhatsAppAlert(riskLevel, waterLevel, flowRate, recommendation);
   }
   
   // Create prediction JSON

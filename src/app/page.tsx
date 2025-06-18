@@ -8,6 +8,7 @@ import { FloodAlert } from '@/components/FloodAlert';
 import { WaterLevelChart } from '@/components/WaterLevelChart';
 import { FlowRateChart } from '@/components/FlowRateChart';
 import { SensorData } from '@/types';
+import { TelegramAlert } from '@/components/TelegramAlert';
 
 export default function Home() {
   const { isConnected, sensorData, floodPrediction } = useMQTT();
@@ -130,6 +131,12 @@ export default function Home() {
               No sensor data available. Check your connection.
             </div>
           )}
+        </div>        {/* WhatsApp Alert */}
+        <div className="mt-6">
+          <TelegramAlert
+            riskLevel={floodPrediction?.riskLevel || 'LOW'}
+            isConnected={isConnected}
+          />
         </div>
       </div>
     </div>

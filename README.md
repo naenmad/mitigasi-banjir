@@ -55,6 +55,13 @@ Sistem IoT untuk mitigasi banjir yang terdiri dari dashboard web dan perangkat s
 - Estimasi waktu hingga banjir (jika ada)
 - Rekomendasi tindakan pencegahan
 
+### 5. Telegram Bot Notifications
+- Notifikasi real-time ke Telegram saat risiko tinggi
+- Alert otomatis untuk level HIGH dan CRITICAL
+- Format pesan lengkap dengan data sensor dan rekomendasi
+- Gratis dan unlimited notifications
+- Setup mudah tanpa subscription fee
+
 ## Instalasi dan Setup
 
 ### 1. Setup Dashboard
@@ -64,36 +71,55 @@ Sistem IoT untuk mitigasi banjir yang terdiri dari dashboard web dan perangkat s
 cd dashboard-arise
 npm install
 
+# Setup environment variables
+cp .env.local.example .env.local
+# Edit .env.local dan tambahkan TELEGRAM_BOT_TOKEN
+
 # Jalankan development server
 npm run dev
 ```
 
 Dashboard akan tersedia di `http://localhost:3000`
 
-### 2. Setup Arduino
+### 2. Setup Telegram Bot
 
-1. Buka file `arduino-code/flood_mitigation_system.ino` di Arduino IDE
+1. **Buat Bot**: Chat @BotFather di Telegram, kirim `/newbot`
+2. **Copy Bot Token** dan tambahkan ke `.env.local`:
+```env
+TELEGRAM_BOT_TOKEN=123456789:ABCdefGHIjklMNOpqrsTUVwxyz
+```
+3. **Dapatkan Chat ID**: Chat @userinfobot untuk mendapatkan Chat ID Anda
+4. **Test di Dashboard**: Masukkan Chat ID dan klik Test
+
+📖 **Detail lengkap**: Lihat [TELEGRAM_SETUP.md](TELEGRAM_SETUP.md)
+
+### 3. Setup Arduino
+
+1. Buka file `arduino-code/flood_mitigation_telegram.ino` di Arduino IDE
 2. Install library yang dibutuhkan:
    - WiFi library (built-in ESP32/ESP8266)
    - PubSubClient
    - ArduinoJson
    - HTTPClient (built-in)
 
-3. Konfigurasi WiFi:
+3. Edit file `arduino-code/config.h`:
 ```cpp
-const char* ssid = "12345678";
-const char* password = "12345678";
+// WiFi Configuration
+const char* WIFI_SSID = "12345678";
+const char* WIFI_PASSWORD = "12345678";
+
+// Telegram Configuration
+const String TELEGRAM_BOT_TOKEN = "123456789:ABCdefGHIjklMNOpqrsTUVwxyz";
+const String TELEGRAM_CHAT_ID = "123456789";
 ```
 
-4. (Opsional) Dapatkan API key dari OpenWeatherMap dan ganti:
-```cpp
-const String weatherApiKey = "YOUR_API_KEY_HERE";
-const String city = "Jakarta"; // Ganti dengan kota Anda
-```
+4. (Opsional) Dapatkan API key dari OpenWeatherMap untuk data cuaca
 
 5. Upload kode ke ESP32/ESP8266
 
-### 3. Wiring Diagram
+📖 **Detail lengkap**: Lihat [HARDWARE_SETUP.md](HARDWARE_SETUP.md)
+
+### 4. Wiring Diagram
 
 ```
 ESP32/ESP8266    HC-SR04    YF-S201

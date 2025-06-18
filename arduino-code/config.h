@@ -115,6 +115,24 @@ const IPAddress STATIC_IP(192, 168, 1, 100); // Static IP address
 const IPAddress GATEWAY(192, 168, 1, 1);     // Gateway address
 const IPAddress SUBNET(255, 255, 255, 0);    // Subnet mask
 
+// ========================================
+// Telegram Bot Configuration
+// ========================================
+const String TELEGRAM_BOT_TOKEN = "7781266122:AAGsKP_RqTLrIKoxmFsOcPRiidv-hCfDg1M";     // Bot token dari @BotFather
+const String TELEGRAM_CHAT_ID = "1187001409";        // Chat ID Anda
+const String TELEGRAM_API_URL = "https://api.telegram.org/bot";
+
+// Telegram Alert Settings
+#define ENABLE_TELEGRAM_ALERTS true          // Enable/disable Telegram notifications
+#define ALERT_COOLDOWN_MINUTES 10            // Minimum interval between alerts (minutes)
+#define CRITICAL_ALERT_ONLY false            // Only send for CRITICAL alerts (true) or HIGH+ (false)
+#define ENABLE_LOCATION_SHARING false        // Share location in alerts (optional)
+
+// Location Settings (optional)
+const float LOCATION_LATITUDE = -6.302536;   // Ganti dengan koordinat lokasi Anda
+const float LOCATION_LONGITUDE = 107.300224; // Ganti dengan koordinat lokasi Anda
+const String LOCATION_NAME = "Flood Monitoring Station";
+
 #endif // CONFIG_H
 
 /*
