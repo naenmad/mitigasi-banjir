@@ -98,9 +98,8 @@ export default function Home() {
 
         {/* Current Readings */}
         <div className="bg-white rounded-lg shadow-sm p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Latest Sensor Readings</h2>
-          {sensorData ? (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Latest Sensor Readings</h2>          {sensorData ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="text-center p-4 bg-blue-50 rounded-lg">
                 <p className="text-sm text-gray-600">Water Level</p>
                 <p className="text-2xl font-bold text-blue-600">
@@ -111,12 +110,6 @@ export default function Home() {
                 <p className="text-sm text-gray-600">Flow Rate</p>
                 <p className="text-2xl font-bold text-green-600">
                   {sensorData.flowRate} L/min
-                </p>
-              </div>
-              <div className="text-center p-4 bg-purple-50 rounded-lg">
-                <p className="text-sm text-gray-600">Rainfall</p>
-                <p className="text-2xl font-bold text-purple-600">
-                  {sensorData.rainfall} mm/h
                 </p>
               </div>
               <div className="text-center p-4 bg-orange-50 rounded-lg">

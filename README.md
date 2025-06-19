@@ -1,6 +1,19 @@
 # Flood Mitigation IoT Dashboard
 
-Sistem IoT untuk mitigasi banjir yang terdiri dari dashboard web dan perangkat sensor untuk monitoring real-time ketinggian air, kecepatan aliran, dan prediksi banjir.
+Sistem IoT untuk mitigasi banjir yang terdiri dari dashboard web dan perangkat sensor untuk monitoring real-time ketinggian air dan kecepatan aliran air, dengan prediksi banjir berbasis sensor.
+
+## 🌊 Versi Sistem
+
+### PURE SENSOR VERSION (Terbaru)
+- **Fokus**: Hanya menggunakan sensor air (Water Level + Flow Rate)
+- **Keunggulan**: 100% gratis, tidak ada biaya API cuaca
+- **Prediksi**: Berdasarkan data sensor saja
+- **File**: `flood_mitigation_pure_sensor.ino`, `mqtt-simulator-pure-sensor.js`
+
+### NO API VERSION (Alternatif)
+- **Fokus**: Sensor + simulasi weather dummy
+- **Keunggulan**: Gratis, weather data simulasi
+- **File**: `flood_mitigation_no_api.ino`, `mqtt-simulator-no-api.js`
 
 ## Komponen Sistem
 
@@ -34,7 +47,6 @@ Sistem IoT untuk mitigasi banjir yang terdiri dari dashboard web dan perangkat s
 ### 1. Real-time Monitoring
 - Monitor ketinggian air dalam cm
 - Monitor kecepatan aliran air dalam L/min
-- Monitor curah hujan dari API cuaca
 - Status koneksi real-time
 
 ### 2. Sistem Peringatan
@@ -61,6 +73,34 @@ Sistem IoT untuk mitigasi banjir yang terdiri dari dashboard web dan perangkat s
 - Format pesan lengkap dengan data sensor dan rekomendasi
 - Gratis dan unlimited notifications
 - Setup mudah tanpa subscription fee
+
+## 🚀 Quick Start
+
+### Opsi A: Pure Sensor Version (Rekomendasi)
+
+**Untuk sistem 100% gratis tanpa API cuaca:**
+
+1. **Dashboard**: 
+```bash
+cd dashboard-arise
+npm install
+npm run dev
+```
+
+2. **Simulator (untuk testing tanpa hardware)**:
+```bash
+node mqtt-simulator-pure-sensor.js
+```
+
+3. **Arduino**: Upload `flood_mitigation_pure_sensor.ino` dengan `config-pure-sensor.h`
+
+### Opsi B: Testing dengan Simulator Lama
+
+**Jika ingin tetap melihat simulasi weather (dummy data):**
+
+```bash
+node mqtt-simulator-no-api.js
+```
 
 ## Instalasi dan Setup
 

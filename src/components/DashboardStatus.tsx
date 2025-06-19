@@ -1,6 +1,6 @@
 'use client';
 
-import { AlertTriangle, Droplets, Activity, Cloud } from 'lucide-react';
+import { AlertTriangle, Activity, Droplet } from 'lucide-react';
 import { SensorData, FloodPrediction } from '@/types';
 
 interface StatusCardProps {
@@ -69,7 +69,7 @@ export const DashboardStatus = ({ sensorData, floodPrediction }: DashboardStatus
                 title="Water Level"
                 value={sensorData?.waterLevel ?? '--'}
                 unit="cm"
-                icon={<Droplets />}
+                icon={<Droplet />}
                 status={sensorData ? getWaterLevelStatus(sensorData.waterLevel) : 'normal'}
             />
 
@@ -79,14 +79,6 @@ export const DashboardStatus = ({ sensorData, floodPrediction }: DashboardStatus
                 unit="L/min"
                 icon={<Activity />}
                 status={sensorData ? getFlowRateStatus(sensorData.flowRate) : 'normal'}
-            />
-
-            <StatusCard
-                title="Rainfall"
-                value={sensorData?.rainfall ?? '--'}
-                unit="mm/h"
-                icon={<Cloud />}
-                status={sensorData && sensorData.rainfall > 10 ? 'warning' : 'normal'}
             />
 
             <StatusCard

@@ -20,106 +20,106 @@ export const TelegramAlert = ({ riskLevel, isConnected }: TelegramAlertProps) =>
     const [isEnabled, setIsEnabled] = useState(true);
     const [isSending, setIsSending] = useState(false);
 
-  const sendTestAlert = async () => {
-    if (!chatId.trim()) {
-      alert('❌ Please enter your Telegram Chat ID first');
-      return;
-    }
+    const sendTestAlert = async () => {
+        if (!chatId.trim()) {
+            alert('❌ Please enter your Telegram Chat ID first');
+            return;
+        }
 
-    // Validate Chat ID format (should be numeric for personal chats)
-    const cleanChatId = chatId.trim();
-    if (!/^-?\d+$/.test(cleanChatId)) {
-      alert('❌ Invalid Chat ID format. Chat ID should be numbers only (e.g., 123456789)');
-      return;
-    }    setIsSending(true);
-    
-    try {
-      console.log('🚀 Sending test alert to chat ID:', cleanChatId);
-      
-      const response = await fetch('/api/send-telegram', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          chatId: cleanChatId,
-          message: '🧪 *Test Alert*\n\n✅ Flood Mitigation System is working properly!\n\n🕒 Time: ' + new Date().toLocaleString(),
-          type: 'test'
-        }),
-      });
+        // Validate Chat ID format (should be numeric for personal chats)
+        const cleanChatId = chatId.trim();
+        if (!/^-?\d+$/.test(cleanChatId)) {
+            alert('❌ Invalid Chat ID format. Chat ID should be numbers only (e.g., 123456789)');
+            return;
+        } setIsSending(true);
 
-      console.log('📡 Response status:', response.status);
-      console.log('📡 Response ok:', response.ok);
+        try {
+            console.log('🚀 Sending test alert to chat ID:', cleanChatId);
 
-      let result;
-      try {
-        const text = await response.text();
-        console.log('📄 Raw response:', text);
-        result = JSON.parse(text);
-        console.log('📄 Parsed response:', result);
-      } catch (parseError) {
-        console.error('❌ JSON Parse Error:', parseError);
-        console.error('Response was not valid JSON');
-        throw new Error('Server returned invalid response format');
-      }
+            const response = await fetch('/api/send-telegram', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    chatId: cleanChatId,
+                    message: '🧪 *Test Alert*\n\n✅ Flood Mitigation System is working properly!\n\n🕒 Time: ' + new Date().toLocaleString(),
+                    type: 'test'
+                }),
+            });
 
-      if (response.ok && result.success) {
-        console.log('✅ Message sent successfully!');
-        const newAlert: AlertHistory = {
-          id: Date.now().toString(),
-          timestamp: new Date().toLocaleString(),
-          level: 'TEST',
-          message: 'Test alert sent successfully',
-          status: 'sent'
-        };
-        setAlertHistory(prev => [newAlert, ...prev.slice(0, 4)]);
-        alert('✅ Test alert sent successfully!');
-      } else {
-        // Handle specific Telegram errors
-        let errorMessage = result?.error || result?.details || 'Unknown error';
-        
-        console.log('❌ API Error:', errorMessage);
-        
-        if (errorMessage.includes('chat not found')) {
-          errorMessage = 'Chat not found! Please:\n' +
+            console.log('📡 Response status:', response.status);
+            console.log('📡 Response ok:', response.ok);
+
+            let result;
+            try {
+                const text = await response.text();
+                console.log('📄 Raw response:', text);
+                result = JSON.parse(text);
+                console.log('📄 Parsed response:', result);
+            } catch (parseError) {
+                console.error('❌ JSON Parse Error:', parseError);
+                console.error('Response was not valid JSON');
+                throw new Error('Server returned invalid response format');
+            }
+
+            if (response.ok && result.success) {
+                console.log('✅ Message sent successfully!');
+                const newAlert: AlertHistory = {
+                    id: Date.now().toString(),
+                    timestamp: new Date().toLocaleString(),
+                    level: 'TEST',
+                    message: 'Test alert sent successfully',
+                    status: 'sent'
+                };
+                setAlertHistory(prev => [newAlert, ...prev.slice(0, 4)]);
+                alert('✅ Test alert sent successfully!');
+            } else {
+                // Handle specific Telegram errors
+                let errorMessage = result?.error || result?.details || 'Unknown error';
+
+                console.log('❌ API Error:', errorMessage);
+
+                if (errorMessage.includes('chat not found')) {
+                    errorMessage = 'Chat not found! Please:\n' +
                         '1. Start a chat with your bot first\n' +
                         '2. Send any message to your bot\n' +
                         '3. Then try the test again\n\n' +
                         'Bot Link: https://t.me/YOUR_BOT_USERNAME';
-        } else if (errorMessage.includes('bot was blocked')) {
-          errorMessage = 'Bot was blocked by user. Please:\n' +
+                } else if (errorMessage.includes('bot was blocked')) {
+                    errorMessage = 'Bot was blocked by user. Please:\n' +
                         '1. Unblock the bot in Telegram\n' +
                         '2. Send /start to the bot\n' +
                         '3. Try the test again';
-        } else if (errorMessage.includes('Unauthorized')) {
-          errorMessage = 'Bot token is invalid or missing. Please check your .env.local file.';
+                } else if (errorMessage.includes('Unauthorized')) {
+                    errorMessage = 'Bot token is invalid or missing. Please check your .env.local file.';
+                }
+
+                throw new Error(errorMessage);
+            }
+        } catch (error) {
+            console.error('Error sending test alert:', error);
+            const newAlert: AlertHistory = {
+                id: Date.now().toString(),
+                timestamp: new Date().toLocaleString(),
+                level: 'TEST',
+                message: 'Failed to send test alert',
+                status: 'failed'
+            };
+            setAlertHistory(prev => [newAlert, ...prev.slice(0, 4)]);
+
+            // Show detailed error message
+            const errorMsg = (error as Error).message;
+            if (errorMsg.includes('\n')) {
+                // Multi-line error, use alert
+                alert('❌ ' + errorMsg);
+            } else {
+                alert('❌ Failed to send test alert: ' + errorMsg);
+            }
+        } finally {
+            setIsSending(false);
         }
-        
-        throw new Error(errorMessage);
-      }
-    } catch (error) {
-      console.error('Error sending test alert:', error);
-      const newAlert: AlertHistory = {
-        id: Date.now().toString(),
-        timestamp: new Date().toLocaleString(),
-        level: 'TEST',
-        message: 'Failed to send test alert',
-        status: 'failed'
-      };
-      setAlertHistory(prev => [newAlert, ...prev.slice(0, 4)]);
-      
-      // Show detailed error message
-      const errorMsg = (error as Error).message;
-      if (errorMsg.includes('\n')) {
-        // Multi-line error, use alert
-        alert('❌ ' + errorMsg);
-      } else {
-        alert('❌ Failed to send test alert: ' + errorMsg);
-      }
-    } finally {
-      setIsSending(false);
-    }
-  };
+    };
 
     const getRiskLevelColor = (level: string) => {
         switch (level.toUpperCase()) {
@@ -240,43 +240,43 @@ export const TelegramAlert = ({ riskLevel, isConnected }: TelegramAlertProps) =>
                 )}
             </div>
 
-      {/* Setup Instructions */}
-      <div className="mt-6 space-y-4">
-        <div className="p-4 bg-blue-50 rounded-lg">
-          <h5 className="text-sm font-medium text-blue-800 mb-2">📱 How to Setup Telegram Bot:</h5>
-          <ol className="text-xs text-blue-700 space-y-1">
-            <li>1. Message @BotFather on Telegram</li>
-            <li>2. Send /newbot and follow instructions</li>
-            <li>3. Copy your Bot Token to .env.local</li>
-            <li>4. <strong>IMPORTANT:</strong> Start a chat with your bot first!</li>
-            <li>5. Send any message to your bot (e.g., "hello")</li>
-            <li>6. Message @userinfobot to get your Chat ID</li>
-            <li>7. Enter Chat ID above and test</li>
-          </ol>
-        </div>
+            {/* Setup Instructions */}
+            <div className="mt-6 space-y-4">
+                <div className="p-4 bg-blue-50 rounded-lg">
+                    <h5 className="text-sm font-medium text-blue-800 mb-2">📱 How to Setup Telegram Bot:</h5>
+                    <ol className="text-xs text-blue-700 space-y-1">
+                        <li>1. Message @BotFather on Telegram</li>
+                        <li>2. Send /newbot and follow instructions</li>
+                        <li>3. Copy your Bot Token to .env.local</li>
+                        <li>4. <strong>IMPORTANT:</strong> Start a chat with your bot first!</li>
+                        <li>5. Send any message to your bot (e.g., "hello")</li>
+                        <li>6. Message @userinfobot to get your Chat ID</li>
+                        <li>7. Enter Chat ID above and test</li>
+                    </ol>
+                </div>
 
-        <div className="p-4 bg-yellow-50 rounded-lg">
-          <h5 className="text-sm font-medium text-yellow-800 mb-2">⚠️ Troubleshooting "Chat Not Found":</h5>
-          <ul className="text-xs text-yellow-700 space-y-1">
-            <li>• <strong>Most common cause:</strong> You haven't messaged your bot yet</li>
-            <li>• Go to Telegram and search for your bot username</li>
-            <li>• Click "START" or send any message to your bot</li>
-            <li>• Bot must receive at least one message from you first</li>
-            <li>• Then try the test again</li>
-          </ul>
-        </div>
+                <div className="p-4 bg-yellow-50 rounded-lg">
+                    <h5 className="text-sm font-medium text-yellow-800 mb-2">⚠️ Troubleshooting "Chat Not Found":</h5>
+                    <ul className="text-xs text-yellow-700 space-y-1">
+                        <li>• <strong>Most common cause:</strong> You haven't messaged your bot yet</li>
+                        <li>• Go to Telegram and search for your bot username</li>
+                        <li>• Click "START" or send any message to your bot</li>
+                        <li>• Bot must receive at least one message from you first</li>
+                        <li>• Then try the test again</li>
+                    </ul>
+                </div>
 
-        <div className="p-4 bg-green-50 rounded-lg">
-          <h5 className="text-sm font-medium text-green-800 mb-2">✅ How to Get Chat ID:</h5>
-          <ol className="text-xs text-green-700 space-y-1">
-            <li>1. Open Telegram and search @userinfobot</li>
-            <li>2. Start the bot and send any message</li>
-            <li>3. The bot will reply with your Chat ID (numbers only)</li>
-            <li>4. Copy the ID and paste it above</li>
-            <li>5. Chat ID looks like: 123456789 or -123456789</li>
-          </ol>
-        </div>
-      </div>
+                <div className="p-4 bg-green-50 rounded-lg">
+                    <h5 className="text-sm font-medium text-green-800 mb-2">✅ How to Get Chat ID:</h5>
+                    <ol className="text-xs text-green-700 space-y-1">
+                        <li>1. Open Telegram and search @userinfobot</li>
+                        <li>2. Start the bot and send any message</li>
+                        <li>3. The bot will reply with your Chat ID (numbers only)</li>
+                        <li>4. Copy the ID and paste it above</li>
+                        <li>5. Chat ID looks like: 123456789 or -123456789</li>
+                    </ol>
+                </div>
+            </div>
         </div>
     );
 };

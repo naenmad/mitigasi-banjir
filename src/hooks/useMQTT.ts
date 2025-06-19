@@ -2,13 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import mqtt from 'mqtt';
-import { SensorData, WeatherData, FloodPrediction } from '@/types';
+import { SensorData, FloodPrediction } from '@/types';
 
 export const useMQTT = () => {
     const [client, setClient] = useState<mqtt.MqttClient | null>(null);
     const [isConnected, setIsConnected] = useState(false);
     const [sensorData, setSensorData] = useState<SensorData | null>(null);
-    const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
     const [floodPrediction, setFloodPrediction] = useState<FloodPrediction | null>(null);
 
     useEffect(() => {
@@ -22,12 +21,9 @@ export const useMQTT = () => {
 
         mqttClient.on('connect', () => {
             console.log('Connected to HiveMQ');
-            setIsConnected(true);
-
-            // Subscribe to topics
+            setIsConnected(true);            // Subscribe to topics
             mqttClient.subscribe([
                 'flood-mitigation/sensors/data',
-                'flood-mitigation/weather/data',
                 'flood-mitigation/prediction/data'
             ], (err) => {
                 if (err) {
@@ -38,14 +34,9 @@ export const useMQTT = () => {
 
         mqttClient.on('message', (topic, message) => {
             try {
-                const data = JSON.parse(message.toString());
-
-                switch (topic) {
+                const data = JSON.parse(message.toString()); switch (topic) {
                     case 'flood-mitigation/sensors/data':
                         setSensorData(data);
-                        break;
-                    case 'flood-mitigation/weather/data':
-                        setWeatherData(data);
                         break;
                     case 'flood-mitigation/prediction/data':
                         setFloodPrediction(data);
@@ -73,13 +64,10 @@ export const useMQTT = () => {
                 mqttClient.end();
             }
         };
-    }, []);
-
-    return {
+    }, []); return {
         client,
         isConnected,
         sensorData,
-        weatherData,
         floodPrediction
     };
 };

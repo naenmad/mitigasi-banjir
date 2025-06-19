@@ -71,11 +71,16 @@ const char* PREDICTION_TOPIC = "flood-mitigation/prediction/data";
 #define FLOW_HIGH_THRESHOLD 25.0              // Flow tinggi threshold
 
 // ========================================
-// Weather API Configuration (Optional)
+// Weather Configuration (No API Required)
 // ========================================
-const String WEATHER_API_KEY = "f1888d375c6b3eedae912412aa279e4e";  // OpenWeatherMap API key
-const String WEATHER_CITY = "Karawang";               // Kota untuk data cuaca
-const String WEATHER_COUNTRY = "ID";                 // Kode negara
+#define USE_WEATHER_API false                 // Disable weather API
+#define USE_DUMMY_WEATHER true                // Use simulated weather data
+#define SIMULATE_RAIN_PROBABILITY 30          // 30% chance of rain in simulation
+
+// Manual Weather Settings (if you know local conditions)
+const float DEFAULT_TEMPERATURE = 27.0;      // Default temperature (°C)
+const float DEFAULT_HUMIDITY = 70.0;         // Default humidity (%)
+const float DEFAULT_RAINFALL = 0.0;          // Default rainfall (mm/h)
 
 // ========================================
 // System Configuration
